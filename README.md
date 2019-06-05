@@ -17,10 +17,11 @@ It is recommended to provide additional currated libraries such as those from [R
 ## Dependencies 
 
 #### Basic programs
-1. [bedtools](https://github.com/arq5x/bedtools2)
-2. [samtools](https://github.com/samtools/samtools)
-3. [perl](https://www.perl.org/get.html)
-4. [HMMER](http://hmmer.org/)
+1. [Python 3](https://www.python.org/downloads/)
+2. [bedtools](https://github.com/arq5x/bedtools2)
+3. [samtools](https://github.com/samtools/samtools)
+4. [perl](https://www.perl.org/get.html)
+5. [HMMER](http://hmmer.org/)
 
 #### TE programs
 1. [RepeatModeler + RepeatClassifer + BuildDatabase](https://github.com/rmhubley/RepeatModeler)
