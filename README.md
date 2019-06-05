@@ -6,8 +6,8 @@
 This is a batch wrapper that uses multiple repeat finding programs including RepeatModeler, 
 TransposonPSI, LTR_finder, and LTR_harvest. LTR_harvest is coupled with LTR_digest and an 
 HMMsearch against pfam domains associated with LTRs to limit false positive identifications. 
-THe constructed libraries are run through RepeatClassifier to classify the LTR's. USEARCH is 
-then used on the concatenated library to remove redundantLTR's based on a 80% similarity. 
+The constructed libraries are run through RepeatClassifier to classify the LTR's. USEARCH is 
+then used on the concatenated library to remove redundant LTR's based on an 80% similarity. 
 The non-redundant library is then used with RepeatMasker to soft mask the assembly.
 
 Currently, all programs are run using default settings with little to no options to alter settings through flags. Additional options may be added to future versions if there is a need.
@@ -34,7 +34,7 @@ It is recommended to provide additional currated libraries such as those from [R
 1. [USEARCH](https://www.drive5.com/usearch/download.html)
 3. [cnv_ltrfinder2gff.pl](https://github.com/jestill/dawgpaws/blob/master/scripts/cnv_ltrfinder2gff.pl)
 
-Dependecies should be able to be called from the commandline, if not then the paths to the parent directories of each executable should be located in $PATH. If all else fails, paths to executables can be passed into the script throguh flags.
+Dependecies should be able to be called from the commandline, if not then the paths to the parent directories of each executable should be located in $PATH. If all else fails, paths to executables can be passed into the script through flags.
 
 ## Usage
 
