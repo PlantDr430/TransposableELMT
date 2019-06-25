@@ -413,8 +413,8 @@ with open(finder_gff, 'r') as gff:
             keep_line.append(line)
 with open(finder_gff3, 'w') as gff3:
     gff3.write(''.join(keep_line))
-subprocess.check_call([BEDTOOLS, 'getfasta', '-name', '-fi', genome_file, '-bed', finder_gff3, '-fo', 
-args.out+'_ltrfinder_library.fasta'], cwd=finder_dir, stderr=subprocess.DEVNULL)
+subprocess.call([BEDTOOLS, 'getfasta', '-name', '-fi', genome_file, '-bed', finder_gff3, '-fo', 
+args.out+'_ltrfinder_library.fasta'], cwd=finder_dir)
 os.remove(genome_file+'.fai')
 shutil.copy(finder_results, work_dir)
 
@@ -489,7 +489,7 @@ with open(args.out+'_all_digest.gff3', 'r') as gff, open(args.out+'_filter_diges
             LTR_models.append(feat)
     gff3.write(''.join(set(LTR_models)).replace('\trepeat_region\t', '\tLTR_retrotransposon_harvest\t'))
 with open(harvest_log, 'a') as h_log:
-    subprocess.check_call([BEDTOOLS, 'getfasta', '-name', '-fi', genome_file, '-bed', digest_gff3, '-fo', 
+    subprocess.call([BEDTOOLS, 'getfasta', '-name', '-fi', genome_file, '-bed', digest_gff3, '-fo', 
     args.out+'_harvest_library.fasta'], cwd=harvest_dir, stderr=h_log)
 os.remove(genome_file+'.fai')
 shutil.copy(harvest_results, work_dir)
