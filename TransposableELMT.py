@@ -173,7 +173,7 @@ if not os.path.isdir(work_dir):
     os.makedirs(os.path.join(work_dir, 'TransposonPSI'))
     os.makedirs(os.path.join(work_dir, 'RepeatClassifier'))
 else:
-    double check directories exists
+    # double check directories exists
     dirs = [os.path.join(args.out, 'working_directory'),os.path.join(args.out, 'repeatmasker'),
     os.path.join(work_dir, 'repeatmodeler'),os.path.join(work_dir, 'ltr_finder'),os.path.join(work_dir, 'ltr_harvest'),
     os.path.join(work_dir, 'usearch'),os.path.join(work_dir, 'TransposonPSI'),
@@ -188,41 +188,56 @@ usearch_dir = os.path.abspath(os.path.join(work_dir, 'usearch'))
 psi_dir = os.path.abspath(os.path.join(work_dir, 'TransposonPSI'))
 class_dir = os.path.abspath(os.path.join(work_dir, 'RepeatClassifier'))
 
-# Checking depencicies
+# Checking dependencies
 try:
     if which_path('bedtools'):
         BEDTOOLS = 'bedtools'
+    else:
+        raise
 except:
     print('bedtools not found, please make sure parent directory of', \
     'bedtools is located in $PATH')
+    sys.exit(1)
 
 try:
     if which_path('samtools'):
         SAMTOOLS = 'samtools'
+    else:
+        raise
 except:
     print('samtools not found, please make sure parent directory of', \
     'bedtools is located in $PATH')
+    sys.exit(1)
 
 try:
     if which_path('perl'):
         None
+    else:
+        raise
 except:
     print('perl not found, please make sure parent directory of ', \
     'perl is located in $PATH')
+    sys.exit(1)
 
 try:
     if which_path('hmmbuild'):
         None
+    else:
+        raise
 except:
     print('hmmbuild not found, please make sure parent directory of', \
     'hmmbuild is located in $PATH')
+    sys.exit(1)
 
 try:
     if which_path('hmmsearch'):
         None
+    else:
+        raise
 except:
     print('hmmsearch not found, please make sure parent directory of', \
     'hmmsearch is located in $PATH')
+    sys.exit(1)
 
 # Checking arguments
 if args.input:
