@@ -16,8 +16,9 @@ to look at the -h /--help menu for all options.
 """
 
 import os, sys, re, argparse, inspect, shutil, subprocess
-rundir = os.getcwd()
+rundir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(rundir)
+currentdir = os.getcwd()
 sys.path.insert(0, parentdir)
 
 class MyFormatter(argparse.RawTextHelpFormatter):
@@ -162,7 +163,7 @@ def walklevel(path_dir, level=0):
 if not os.path.isdir(args.out):
     os.makedirs(os.path.join(args.out, 'working_directory'))
     os.makedirs(os.path.join(args.out, 'repeatmasker'))
-result_dir = os.path.abspath(os.path.join(rundir, args.out))
+result_dir = os.path.abspath(os.path.join(currentdir, args.out))
 work_dir = os.path.abspath(os.path.join(args.out, 'working_directory'))
 masker_dir = os.path.abspath(os.path.join(args.out, 'repeatmasker'))
 if not os.path.isdir(work_dir):
@@ -398,6 +399,9 @@ if not args.repeatmodeler_lib: #no pre-computed repeat library is given, so must
     modeler_log = os.path.abspath(os.path.join(modeler_dir, 'repeatmodeler.log'))
     if os.path.exists(modeler_log):
         os.remove(modeler_log)
+    for x in os.listdir(modeler_dir): # remove old folder if present
+            if x.startswith('RM_'):
+                shutil.rmtree(os.path.join(modeler_dir,x))
     with open(modeler_log, 'a') as rm_log:
         subprocess.call([BUILDDATABASE, '-name', args.out, '-engine', args.engine, '-dir', work_dir
         ], cwd=modeler_dir, stdout=rm_log, stderr=rm_log)
@@ -406,8 +410,8 @@ if not args.repeatmodeler_lib: #no pre-computed repeat library is given, so must
         for x in os.listdir(modeler_dir):
             if x.startswith('RM_'):
                 modeler_out = os.path.abspath(os.path.join(modeler_dir,x))
-        modeler_output = os.path.join(modeler_out, 'consensi.fa.classified')
-        shutil.copy(modeler_output, os.path.join(work_dir, '{}_modeler_library.fasta'.format(args.out)))
+                modeler_output = os.path.join(modeler_out, 'consensi.fa.classified')
+                shutil.copy(modeler_output, os.path.join(work_dir, 'modeler_library.fasta'))
 
 ## ltr_finder run ##
 
@@ -415,7 +419,7 @@ print("Running ltr_finder: This won't take long")
 finder_output = os.path.abspath(os.path.join(finder_dir, 'ltr_finder.txt'))
 finder_gff = os.path.abspath(os.path.join(finder_dir, args.out+'_ltrfinder.gff'))
 finder_gff3 = os.path.abspath(os.path.join(finder_dir, args.out+'_ltrfinder.gff3'))
-finder_results = os.path.abspath(os.path.join(finder_dir, args.out+'_ltrfinder_library.fasta'))
+finder_results = os.path.abspath(os.path.join(finder_dir, 'ltrfinder_library.fasta'))
 if os.path.exists(finder_output):
     os.remove(finder_output)
 with open(finder_output, 'a') as lf_out:
@@ -430,7 +434,7 @@ with open(finder_gff, 'r') as gff:
 with open(finder_gff3, 'w') as gff3:
     gff3.write(''.join(keep_line))
 subprocess.call([BEDTOOLS, 'getfasta', '-name', '-fi', genome_file, '-bed', finder_gff3, '-fo', 
-args.out+'_ltrfinder_library.fasta'], cwd=finder_dir)
+'ltrfinder_library.fasta'], cwd=finder_dir)
 os.remove(genome_file+'.fai')
 shutil.copy(finder_results, work_dir)
 
@@ -443,7 +447,7 @@ index_dir = os.path.abspath(os.path.join(harvest_dir, 'index'))
 index_name = os.path.abspath(os.path.join(index_dir, args.out))
 sorted_gff = os.path.abspath(os.path.join(harvest_dir, args.out+'_sorted_harvest.gff3'))
 digest_gff3 = os.path.abspath(os.path.join(harvest_dir, args.out+'_filter_digest.gff3'))
-harvest_results = os.path.abspath(os.path.join(harvest_dir,args.out+'_harvest_library.fasta'))
+harvest_results = os.path.abspath(os.path.join(harvest_dir,'harvest_library.fasta'))
 if os.path.exists(harvest_results):
     os.remove(harvest_results)
 if os.path.exists(harvest_log):
@@ -506,22 +510,27 @@ with open(args.out+'_all_digest.gff3', 'r') as gff, open(args.out+'_filter_diges
     gff3.write(''.join(set(LTR_models)).replace('\trepeat_region\t', '\tLTR_retrotransposon_harvest\t'))
 with open(harvest_log, 'a') as h_log:
     subprocess.call([BEDTOOLS, 'getfasta', '-name', '-fi', genome_file, '-bed', digest_gff3, '-fo', 
-    args.out+'_harvest_library.fasta'], cwd=harvest_dir, stderr=h_log)
+    'harvest_library.fasta'], cwd=harvest_dir, stderr=h_log)
 os.remove(genome_file+'.fai')
 shutil.copy(harvest_results, work_dir)
+
+sys.exit()
 
 ## TransposonPSI run ##
 
 print("Running TransposonPSI: This will take some time")
 psi_log = os.path.abspath(os.path.join(psi_dir, 'TransposonPSI.log'))
 psi_gff3 = os.path.abspath(os.path.join(psi_dir, args.out+'_Tpsi.gff3'))
-psi_results = os.path.abspath(os.path.join(psi_dir,args.out+'_Tpsi_library.fasta'))
+psi_results = os.path.abspath(os.path.join(psi_dir,'Tpsi_library.fasta'))
 if os.path.exists(psi_results):
     os.remove(psi_results)
 if os.path.exists(psi_log):
     os.remove(psi_log)
-with open(psi_log, 'a') as psi_log:
-    subprocess.call([TRANSPOSONPSI, genome_file, 'nuc'], cwd=psi_dir, stdout=psi_log, stderr=psi_log)
+try:
+    with open(psi_log, 'a') as psi_log:
+        subprocess.call([TRANSPOSONPSI, genome_file, 'nuc'], cwd=psi_dir, stdout=psi_log, stderr=psi_log)
+except:
+    print('There was an error with TransposonPSI, please check the logfile located in {}'.format(psi_dir))
 best_hits = [f for f in os.listdir(psi_dir) if os.path.isfile(os.path.join(psi_dir, f)) and 'bestPerLocus.gff3' in f]
 best_hits_gff = os.path.abspath(os.path.join(psi_dir, ''.join(best_hits)))
 with open(best_hits_gff, 'r') as best_hits, open(psi_gff3, 'w') as gff3:
@@ -531,35 +540,29 @@ with open(best_hits_gff, 'r') as best_hits, open(psi_gff3, 'w') as gff3:
         gff3.write(col[0] + '\t' + col[1] + '\t' + target + '\t' + col[3] +
         '\t' + col[4] + '\t'+ col[5] + '\t' + col[6] + '\t' + col[7] + '\t' + col[8])
 subprocess.call([BEDTOOLS, 'getfasta', '-name', '-fi', genome_file, '-bed', psi_gff3, '-fo', 
-args.out+'_Tpsi_library.fasta'], cwd=psi_dir, stderr=subprocess.DEVNULL)
+'Tpsi_library.fasta'], cwd=psi_dir, stderr=subprocess.DEVNULL)
 os.remove(genome_file+'.fai')
 shutil.copy(psi_results, work_dir)
 
 ## Preparing files for RepeatClassifier ##
 
-if args.repbase_lib:
-    repbase_lib = os.path.abspath(os.path.join(rundir, args.repbase_lib))
-ltr_finder_lib = os.path.abspath(os.path.join(work_dir, args.out+'_ltrfinder_library.fasta'))
-ltr_harvest_lib = os.path.abspath(os.path.join(work_dir, args.out+'_harvest_library.fasta'))
-Tpsi_lib = os.path.abspath(os.path.join(work_dir, args.out+'_Tpsi_library.fasta'))
-concatenated_lib = os.path.abspath(os.path.join(class_dir, args.out+'_concat_library.fasta'))
+ltr_finder_lib = os.path.abspath(os.path.join(work_dir, 'ltrfinder_library.fasta'))
+ltr_harvest_lib = os.path.abspath(os.path.join(work_dir, 'harvest_library.fasta'))
+Tpsi_lib = os.path.abspath(os.path.join(work_dir, 'Tpsi_library.fasta'))
+concatenated_lib = os.path.abspath(os.path.join(class_dir, 'concat_library.fasta'))
 if os.path.exists(concatenated_lib):
     os.remove(concatenated_lib)
 with open(concatenated_lib, 'w') as concat_lib:
-    if args.repbase_lib: # If repbase or alterniative file is passed in flag
-        subprocess.call(['cat', repbase_lib, ltr_finder_lib, ltr_harvest_lib, Tpsi_lib
-        ], cwd=class_dir, stdout=concat_lib)
-    else: # If repbase_lib flag is not used
-        subprocess.call(['cat', ltr_finder_lib, ltr_harvest_lib, Tpsi_lib
-        ], cwd=class_dir, stdout=concat_lib)
+    subprocess.call(['cat', ltr_finder_lib, ltr_harvest_lib, Tpsi_lib
+    ], cwd=class_dir, stdout=concat_lib)
 
 ## RepeatClassifier run ##
 
 print("Running RepeatClassifier: This can take some time depending on the size of the library")
-unclassified_lib = os.path.abspath(os.path.join(class_dir, args.out+'_concat_library.fasta'))
+unclassified_lib = os.path.abspath(os.path.join(class_dir, 'concat_library.fasta'))
 class_log = os.path.abspath(os.path.join(class_dir, 'repeatclassifier.log'))
-classified_lib = os.path.abspath(os.path.join(class_dir, args.out+'_concat_library.fasta.classified'))
-classified_mask = os.path.abspath(os.path.join(class_dir, args.out+'_concat_library.fasta.masked'))
+classified_lib = os.path.abspath(os.path.join(class_dir, 'concat_library.fasta.classified'))
+classified_mask = os.path.abspath(os.path.join(class_dir, 'concat_library.fasta.masked'))
 if os.path.exists(class_log):
     os.remove(class_log)
 with open(class_log, 'a') as cl_log:
@@ -569,17 +572,19 @@ with open(class_log, 'a') as cl_log:
 # Preparing files for USEARCH ##
 
 usearch_prep = os.path.abspath(os.path.join(usearch_dir, 'usearch_prep.fasta'))
+if args.repbase_lib:
+    repbase_lib = os.path.abspath(os.path.join(currentdir, args.repbase_lib))
 if args.repeatmodeler_lib:
-    repeatmodeler_lib = os.path.abspath(os.path.join(rundir, args.repeatmodeler_lib))
+    repeatmodeler_lib = os.path.abspath(os.path.join(currentdir, args.repeatmodeler_lib))
 else:
-    repeatmodeler_lib = os.path.abspath(os.path.join(work_dir, args.out+'_modeler_library.fasta'))
+    repeatmodeler_lib = os.path.abspath(os.path.join(work_dir, 'modeler_library.fasta'))
 with open(usearch_prep, 'w') as u_prep:
-    subprocess.call(['cat', repeatmodeler_lib, classified_lib], cwd=usearch_dir, stdout=u_prep)
+    subprocess.call(['cat', repeatmodeler_lib, repbase_lib, classified_lib], cwd=usearch_dir, stdout=u_prep)
 
 ## USEARCH run ##
 
 print("Running Usearch: This won't take too long.")
-usearch_results = os.path.abspath(os.path.join(usearch_dir, args.out+'_nonredundant_library.fasta'))
+usearch_results = os.path.abspath(os.path.join(usearch_dir, 'nonredundant_library.fasta'))
 usearch_log = os.path.abspath(os.path.join(usearch_dir, 'usearch.log'))
 if os.path.exists(usearch_results):
     os.remove(usearch_results)
@@ -592,7 +597,7 @@ with open(usearch_log, 'a') as u_log:
 
 ## Fixing up some Unknown calls, based on RepBase calls. This is not meant to be extensive ##
 
-final_lib = os.path.abspath(os.path.join(work_dir, args.out+'_final_library.fasta'))
+final_lib = os.path.abspath(os.path.join(work_dir, 'final_library.fasta'))
 LTR_list = ['Copia', 'copia', 'gypsy', 'Gypsy', 'LTR_retrotransposon_harvest', 'CALTR', 'CEN1_SP', 'Roo']
 DNA_list = ['mariner', 'cacta', 'hAT', 'EnSpm', 'DNA transposon', 'MuDR', 'Academ', 'Dada', 'Crypton']
 RC_list = ['Helitron', 'helitron']
