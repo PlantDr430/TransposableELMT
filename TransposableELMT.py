@@ -484,7 +484,10 @@ with open(args.out+'_all_digest.gff3', 'r') as gff, open(args.out+'_filter_diges
             pass
         elif line.startswith('#'):
             contig_id = re.search(r'(#)(.*)', line).group(2)
-            contigs.append(contig_id)
+            if ' ' in contig_id:
+                contigs.append(contig_id.split(' ')[0])
+            else:
+                contigs.append(contig_id)
 
     convert = lambda text: int(text) if text.isdigit() else text
     alphanum_key = lambda key: [convert(c) for c in re.split('([0-9]+)', key)]
