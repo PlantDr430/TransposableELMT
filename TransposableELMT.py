@@ -394,24 +394,24 @@ else:
 
 ## RepeatModeler run ##
 
-if not args.repeatmodeler_lib: #no pre-computed repeat library is given, so must run RepeatModeler
-    print('Running RepeatModeler: This will take a while...')
-    modeler_log = os.path.abspath(os.path.join(modeler_dir, 'repeatmodeler.log'))
-    if os.path.exists(modeler_log):
-        os.remove(modeler_log)
-    for x in os.listdir(modeler_dir): # remove old folder if present
-            if x.startswith('RM_'):
-                shutil.rmtree(os.path.join(modeler_dir,x))
-    with open(modeler_log, 'a') as rm_log:
-        subprocess.call([BUILDDATABASE, '-name', args.out, '-engine', args.engine, '-dir', work_dir
-        ], cwd=modeler_dir, stdout=rm_log, stderr=rm_log)
-        subprocess.call([REPEATMODELER, '-e', args.engine , '-database', args.out, '-pa', str(args.cpus)
-        ], cwd=modeler_dir, stdout=rm_log, stderr=rm_log)
-        for x in os.listdir(modeler_dir):
-            if x.startswith('RM_'):
-                modeler_out = os.path.abspath(os.path.join(modeler_dir,x))
-                modeler_output = os.path.join(modeler_out, 'consensi.fa.classified')
-                shutil.copy(modeler_output, os.path.join(work_dir, 'modeler_library.fasta'))
+# if not args.repeatmodeler_lib: #no pre-computed repeat library is given, so must run RepeatModeler
+    # print('Running RepeatModeler: This will take a while...')
+    # modeler_log = os.path.abspath(os.path.join(modeler_dir, 'repeatmodeler.log'))
+    # if os.path.exists(modeler_log):
+        # os.remove(modeler_log)
+    # for x in os.listdir(modeler_dir): # remove old folder if present
+            # if x.startswith('RM_'):
+                # shutil.rmtree(os.path.join(modeler_dir,x))
+    # with open(modeler_log, 'a') as rm_log:
+        # subprocess.call([BUILDDATABASE, '-name', args.out, '-engine', args.engine, '-dir', work_dir
+        # ], cwd=modeler_dir, stdout=rm_log, stderr=rm_log)
+        # subprocess.call([REPEATMODELER, '-e', args.engine , '-database', args.out, '-pa', str(args.cpus)
+        # ], cwd=modeler_dir, stdout=rm_log, stderr=rm_log)
+        # for x in os.listdir(modeler_dir):
+            # if x.startswith('RM_'):
+                # modeler_out = os.path.abspath(os.path.join(modeler_dir,x))
+                # modeler_output = os.path.join(modeler_out, 'consensi.fa.classified')
+                # shutil.copy(modeler_output, os.path.join(work_dir, 'modeler_library.fasta'))
 
 ## ltr_finder run ##
 
@@ -437,7 +437,6 @@ subprocess.call([BEDTOOLS, 'getfasta', '-name', '-fi', genome_file, '-bed', find
 'ltrfinder_library.fasta'], cwd=finder_dir)
 os.remove(genome_file+'.fai')
 shutil.copy(finder_results, work_dir)
-
 
 ## ltr_harvest run ##
 
@@ -473,17 +472,19 @@ with open(args.out+'_all_digest.gff3', 'r') as gff, open(args.out+'_filter_diges
     models = []
     all_models = []
     for line in gff:
-        if line.startswith('##s'):
+        if line.startswith('##sequence-region'):
             seq_id = re.search(r'(seq\d+)', line).group(1)
             seqs.append(seq_id)
-        elif line.startswith('#c'):
-            contig_id = re.search(r'(contig_\d+)', line).group(1)
-            contigs.append(contig_id)
         elif line.startswith('seq'):
             models.append(line)
         elif line.startswith('###'):
             all_models.append(models)
             models = []
+        elif line.startswith('##gff'):
+            pass
+        elif line.startswith('#'):
+            contig_id = re.search(r'(#)(.*)', line).group(2)
+            contigs.append(contig_id)
     
     convert = lambda text: int(text) if text.isdigit() else text
     alphanum_key = lambda key: [convert(c) for c in re.split('([0-9]+)', key)]
