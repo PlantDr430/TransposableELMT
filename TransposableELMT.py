@@ -243,7 +243,9 @@ except:
 # Checking arguments
 if args.input:
     input_file = os.path.abspath(os.path.join(work_dir, args.out+'_assembly.fasta'))
+    modeler_copy = os.path.abspath(os.path.join(modeler_dir, args.out+'_assembly.fasta'))
     shutil.copy(args.input, input_file)
+    shutil.copy(args.input, modeler_copy)
 else:
     print('Error: Please provide a genome assembly, -in or --input')
 genome_file = input_file
@@ -403,7 +405,7 @@ if not args.repeatmodeler_lib: #no pre-computed repeat library is given, so must
             if x.startswith('RM_'):
                 shutil.rmtree(os.path.join(modeler_dir,x))
     with open(modeler_log, 'a') as rm_log:
-        subprocess.call([BUILDDATABASE, '-name', args.out, '-engine', args.engine, '-dir', work_dir
+        subprocess.call([BUILDDATABASE, '-name', args.out, '-engine', args.engine, '-dir', modeler_dir
         ], cwd=modeler_dir, stdout=rm_log, stderr=rm_log)
         subprocess.call([REPEATMODELER, '-e', args.engine , '-database', args.out, '-pa', str(args.cpus)
         ], cwd=modeler_dir, stdout=rm_log, stderr=rm_log)
