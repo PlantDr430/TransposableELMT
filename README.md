@@ -14,7 +14,7 @@ The non-redundant library is then used with RepeatMasker to soft mask the assemb
 
 Currently, all programs are run using default settings with little to no options to alter settings through flags. Additional options may be added to future versions if there is a need.
 
-It is recommended to provide additional currated libraries such as those from [RepBase](https://www.girinst.org/repbase/update/browse.php). Simply select an appropriate toxanomic level and download the file in FASTA format. Then provide the file with the ```-rb``` flag on the command line.
+It is recommended to provide additional currated libraries such as those from [RepBase](https://www.girinst.org/repbase/update/browse.php). Simply select an appropriate taxanomic level and download the file in FASTA format. Then provide the file with the ```-rb``` flag on the command line.
 
 ## Dependencies 
 
