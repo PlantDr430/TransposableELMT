@@ -3,7 +3,9 @@
 
 ## Summary
 
-This is a batch wrapper that uses multiple repeat finding programs including RepeatModeler, 
+This script follows procedures set forth in Coghlan, A., Tsai, I.J., Berriman, M. 2018. Creation of a comprehensive repeat library for a newly sequenced parasitic worm genome. Protocolexchange DOI: [10.1038/protex.2018.054](https://protocolexchange.researchsquare.com/article/nprot-6761/v1)
+
+This is a simple wrapper script that uses multiple repeat finding programs including RepeatModeler, 
 TransposonPSI, LTR_finder, and LTR_harvest. LTR_harvest is coupled with LTR_digest and an 
 HMMsearch against pfam domains associated with LTRs to limit false positive identifications. 
 The constructed libraries are run through RepeatClassifier to classify the LTR's. USEARCH is 
