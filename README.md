@@ -41,7 +41,7 @@ Dependecies should be able to be called from the commandline, if not then the pa
 ## Usage
 
 ```
-usage: ./new_ltr_wrapper.py [options] -in genome_assembly.fasta -o output_basename
+usage: ./TransposableELMT.py [options] -in genome_assembly.fasta -o output_basename
 
 optional arguments:
   -h, --help                  show this help message and exit
